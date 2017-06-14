@@ -1,6 +1,6 @@
 package au.cogito.collab.configuration;
 
-import au.cogito.collab.Filters.AuthenticationFilter;
+import au.cogito.collab.filters.*;
 import au.cogito.collab.controllers.ApiController;
 import au.cogito.collab.security.DomainUsernamePasswordAuthenticationProvider;
 import au.cogito.collab.security.TokenAuthenticationProvider;
@@ -90,33 +90,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         return new TokenService();
     }
 
-//    @Bean
-//    public EmbeddedServletContainerFactory servletContainer() {
-//        TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory();
-//        tomcat.addAdditionalTomcatConnectors(createSslConnector());
-//        return tomcat;
-//    }
-//
-//    private Connector createSslConnector() {
-//        Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
-//        Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
-//        try {
-//            File keystore = new ClassPathResource("collab.jks").getFile();
-//            //File truststore = new ClassPathResource("pavan.keystore").getFile();
-//            connector.setScheme("https");
-//            connector.setSecure(true);
-//            connector.setPort(8443);
-//            protocol.setSSLEnabled(true);
-//            protocol.setKeystoreFile(keystore.getAbsolutePath());
-//            protocol.setKeystorePass("198193");
-//            //protocol.setTruststoreFile(truststore.getAbsolutePath());
-//            protocol.setTruststorePass("198193");
-//            protocol.setKeyAlias("selfsigned");
-//            return connector;
-//        }
-//        catch (IOException ex) {
-//            throw new IllegalStateException("can't access keystore: [" + "keystore"
-//                    + "] or truststore: [" + "keystore" + "]", ex);
-//        }
-//    }
 }

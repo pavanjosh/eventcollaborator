@@ -19,6 +19,7 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
     public TokenAuthenticationProvider(TokenService tokenService){
         this.tokenService = tokenService;
     }
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String token = authentication.getPrincipal().toString();
@@ -28,7 +29,9 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
         if (!tokenService.contains(token)) {
             throw new BadCredentialsException("Invalid token or token expired");
         }
-        return tokenService.retrieve(token);
+        Authentication retrieve = tokenService.retrieve(token);
+        //retrieve.setAuthenticated(true);
+        return retrieve;
     }
 
     @Override

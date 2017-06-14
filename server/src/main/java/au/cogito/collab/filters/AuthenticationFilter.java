@@ -1,4 +1,4 @@
-package au.cogito.collab.Filters;
+package au.cogito.collab.filters;
 
 import au.cogito.collab.controllers.ApiController;
 import au.cogito.collab.security.TokenResponse;
@@ -68,7 +68,7 @@ public class AuthenticationFilter extends GenericFilterBean {
 
                 if (token.isPresent()) {
                     //logger.debug("Trying to authenticate user by X-Auth-Token method. Token: {}", token.get());
-                    //processTokenAuthentication(token.get());
+                    processTokenAuthentication(token.get());
                 }
 
                 else{

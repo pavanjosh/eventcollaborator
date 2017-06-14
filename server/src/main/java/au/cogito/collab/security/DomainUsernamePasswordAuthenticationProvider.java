@@ -25,6 +25,7 @@ public class DomainUsernamePasswordAuthenticationProvider implements Authenticat
     public DomainUsernamePasswordAuthenticationProvider(TokenService tokenService){
         this.tokenService = tokenService;
     }
+
     @Override
     public AuthenticationWithToken authenticate(Authentication authentication)  {
         String username = authentication.getPrincipal().toString();
@@ -32,9 +33,9 @@ public class DomainUsernamePasswordAuthenticationProvider implements Authenticat
         AuthenticationWithToken authenticationWithToken = new AuthenticationWithToken(username, password);
         if(loginService.login(username,password)){
             String newToken = tokenService.generateNewToken();
-            tokenService.store(newToken, authentication);
+            authenticationWithToken.setAuthenticated(true);
+            tokenService.store(newToken, authenticationWithToken);
             authenticationWithToken.setToken(newToken);
-
         }
         return authenticationWithToken;
     }
