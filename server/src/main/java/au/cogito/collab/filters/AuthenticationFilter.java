@@ -3,6 +3,8 @@ package au.cogito.collab.filters;
 import au.cogito.collab.controllers.ApiController;
 import au.cogito.collab.security.TokenResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.HttpRequest;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,6 +40,7 @@ public class AuthenticationFilter extends GenericFilterBean {
     public static final String TOKEN_SESSION_KEY = "token";
     public static final String USER_SESSION_KEY = "user";
 
+    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     public AuthenticationFilter(AuthenticationManager authenticationManager){
         this.authenticationManager = authenticationManager;
@@ -51,6 +54,8 @@ public class AuthenticationFilter extends GenericFilterBean {
         Optional<String> password = Optional.ofNullable(httpRequest.getHeader("X-Auth-Password"));
         Optional<String> token = Optional.ofNullable(httpRequest.getHeader("X-Auth-token"));
 
+        LOG.debug("In Authentication Filter");
+
         String resourcePath = new UrlPathHelper().getPathWithinApplication(httpRequest);
         try{
             if(requestForUnauthrisedPath(resourcePath)){
@@ -62,12 +67,14 @@ public class AuthenticationFilter extends GenericFilterBean {
                     if(!userName.isPresent() || !password.isPresent()){
                         throw new InternalAuthenticationServiceException("User Name and Password Missing in header");
                     }
+                    LOG.debug("In Authentication Filter username {}, password {} ", userName.get(),password.get());
                     processUserNameAndPasswordAuthentication(httpResponse,userName.get(),password.get());
                     return;
                 }
 
                 if (token.isPresent()) {
                     //logger.debug("Trying to authenticate user by X-Auth-Token method. Token: {}", token.get());
+                    LOG.debug("In Authentication Filter token {} ",token.get());
                     processTokenAuthentication(token.get());
                 }
 
@@ -77,18 +84,20 @@ public class AuthenticationFilter extends GenericFilterBean {
             }
 
 
-            //addSessionContextToLogging();
+            addSessionContextToLogging();
             chain.doFilter(request, response);
         }
         catch (InternalAuthenticationServiceException internalAuthenticationServiceException) {
             SecurityContextHolder.clearContext();
-            logger.error("Internal authentication service exception", internalAuthenticationServiceException);
+            LOG.error("Internal authentication service exception", internalAuthenticationServiceException);
             httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (BadCredentialsException authenticationException) {
             SecurityContextHolder.clearContext();
+            LOG.error("Bad credentials exception", authenticationException);
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, authenticationException.getMessage());
         } catch (AuthenticationException authenticationException) {
             SecurityContextHolder.clearContext();
+            LOG.error("Authentication exception", authenticationException);
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, authenticationException.getMessage());
         } finally {
             MDC.remove(TOKEN_SESSION_KEY);
@@ -137,12 +146,12 @@ public class AuthenticationFilter extends GenericFilterBean {
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userName, password);
         Authentication authenticate = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-//        if(authenticate==null ){
-//            throw new InternalAuthenticationServiceException("Unable to authenticate user");
-//        }
-//        else if(!authenticate.isAuthenticated()){
-//            throw new BadCredentialsException("Not a valid user");
-//        }
+        if(authenticate==null ){
+            throw new InternalAuthenticationServiceException("Unable to authenticate user");
+        }
+        else if(!authenticate.isAuthenticated()){
+            throw new BadCredentialsException("Not a valid user");
+        }
         SecurityContextHolder.getContext().setAuthentication(authenticate);
 
         TokenResponse tokenResponse= new TokenResponse();
