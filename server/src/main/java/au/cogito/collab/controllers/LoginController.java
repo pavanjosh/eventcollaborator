@@ -4,6 +4,7 @@ import au.cogito.collab.model.repo.Login;
 import au.cogito.collab.model.repo.LoginDAO;
 import au.cogito.collab.model.repo.UserDAO;
 import au.cogito.collab.model.repo.UserEntity;
+import au.cogito.collab.model.request.PasswordResetRequest;
 import au.cogito.collab.model.request.UserRegistrationRequest;
 import au.cogito.collab.service.CollabEmailService;
 import au.cogito.collab.service.CollabEmailServiceIF;
@@ -17,7 +18,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UrlPathHelper;
+import sun.rmi.runtime.Log;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -120,5 +123,40 @@ public class LoginController {
             return new ResponseEntity<String>("No user found by this email id ",HttpStatus.OK);
         }
 
+    }
+
+    @RequestMapping(value = "/user/reset" , method = RequestMethod.GET)
+    public ResponseEntity<String> resetPasswordForToken(@RequestParam String token){
+
+        LOG.debug("token for reset password is " + token);
+        UserEntity byResetToken = userDAO.findByResetToken(token);
+        if(byResetToken!=null){
+            LOG.debug("user for which the token generated is {}",byResetToken);
+        }
+        else{
+            return new ResponseEntity<String>("User with the token not found or token expired",HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<String>("User found for the token",HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/user/reset" , method = RequestMethod.POST)
+    public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequest passwordResetRequest){
+
+        if(passwordResetRequest != null
+                && passwordResetRequest.getUserEmail() !=null
+                && passwordResetRequest.getPassword() != null) {
+
+            LOG.debug("email id for which the password reset requested is  {}", passwordResetRequest.getUserEmail());
+            Login byEmail = loginDAO.findByEmail(passwordResetRequest.getUserEmail());
+            if (byEmail != null) {
+               byEmail.setPassword(passwordResetRequest.getPassword());
+               loginDAO.save(byEmail);
+                return new ResponseEntity<String>("Password reset Success ", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<String>("User with the email id not found ", HttpStatus.NOT_FOUND);
+            }
+        }
+        return new ResponseEntity<String>("Improper request",HttpStatus.BAD_REQUEST);
     }
 }

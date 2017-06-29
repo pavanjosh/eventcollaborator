@@ -13,5 +13,7 @@ public interface UserDAO extends CrudRepository<UserEntity,String>{
 
     public UserEntity findByUserEmail(String userEmail);
 
+    public UserEntity findByResetToken(String token);
+
     public List<UserEntity> findAllByActive(boolean active);
 }

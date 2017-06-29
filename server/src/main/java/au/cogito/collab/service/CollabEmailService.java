@@ -33,7 +33,6 @@ public class CollabEmailService implements CollabEmailServiceIF {
     @Autowired
     private JavaMailSenderImpl javaMailSender;
 
-    @Async
     @Override
     public void sendEmail(String userEmail, String resetPasswordUrl) {
         Log.debug("in sendEmail method of Email Service");
@@ -47,6 +46,6 @@ public class CollabEmailService implements CollabEmailServiceIF {
 
         Log.info("The SimpleMailMessage to be sent is {}", passwordResetEmail);
         javaMailSender.send(passwordResetEmail);
-        Log.debug("The mail is sent using javaMialSender");
+        Log.debug("The mail is sent successfully");
     }
 }

@@ -115,7 +115,8 @@ public class AuthenticationFilter extends GenericFilterBean {
          if(resourcePath.equals("/user/register")
                  || resourcePath.equals("/home")
                  || resourcePath.equals("/index")
-                 ||resourcePath.equals("/user/forgot")){
+                 ||resourcePath.equals("/user/forgot")
+                 ||resourcePath.equals("/user/reset")){
              return true;
          }
         return false;
