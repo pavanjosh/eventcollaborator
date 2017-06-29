@@ -15,8 +15,6 @@ public class Login {
 
     private String password;
 
-
-
     @OneToOne
     @JoinColumn(name = "USER_ID")
     private UserEntity userEntity;
