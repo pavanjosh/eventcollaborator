@@ -39,9 +39,7 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.perf4j/perf4j
 	compile group: 'org.perf4j', name: 'perf4j', version: '0.9.16'
 
-	// https://mvnrepository.com/artifact/javax.mail/mail
-	compile group: 'javax.mail', name: 'mail', version: '1.4.1'
-
+	compile('org.springframework.boot:spring-boot-starter-mail')
 
 	compile("io.springfox:springfox-swagger2:2.5.0")
 	compile("io.springfox:springfox-swagger-ui:2.5.0")

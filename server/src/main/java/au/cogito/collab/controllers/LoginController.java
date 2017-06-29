@@ -1,21 +1,28 @@
 package au.cogito.collab.controllers;
 
-import au.cogito.collab.model.repo.*;
+import au.cogito.collab.model.repo.Login;
+import au.cogito.collab.model.repo.LoginDAO;
+import au.cogito.collab.model.repo.UserDAO;
+import au.cogito.collab.model.repo.UserEntity;
 import au.cogito.collab.model.request.UserRegistrationRequest;
-import au.cogito.collab.service.UserServiceIF;
-import com.google.gson.Gson;
+import au.cogito.collab.service.CollabEmailService;
+import au.cogito.collab.service.CollabEmailServiceIF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.util.UrlPathHelper;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.UUID;
+
 
 /**
  * Created by pavankumarjoshi on 26/04/2017.
@@ -28,6 +35,14 @@ public class LoginController {
 
     @Autowired
     private UserDAO userDAO;
+
+    @Autowired
+    private CollabEmailServiceIF emailService;
+
+    @Value("${collab.base.url}")
+    private String collabBaseUrl;
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
 
     @RequestMapping(name="LoginController",value = "/login",method= RequestMethod.POST)
     public ResponseEntity<String> getLogin(@RequestBody Login login){
@@ -72,5 +87,38 @@ public class LoginController {
 
     }
 
+    /**
+     *
+     * @param userEmail
+     * @param httpServletRequest
+     * @return
+     */
 
+    @RequestMapping(name="LoginController",value = "/user/forgot",method= RequestMethod.POST)
+    public ResponseEntity<String> forgotPassword(@RequestBody String userEmail,HttpServletRequest httpServletRequest){
+
+
+        UserEntity byUserEmail = userDAO.findByUserEmail(userEmail);
+
+        if(byUserEmail != null){
+            // If user is found create a random token against the user. store it for furthur checking
+            String token = UUID.randomUUID().toString();
+            byUserEmail.setResetToken(token);
+            userDAO.save(byUserEmail);
+
+            UrlPathHelper urlPathHelper = new UrlPathHelper();
+
+            String resetPasswordUrl = collabBaseUrl+ urlPathHelper.getContextPath(httpServletRequest)+
+                    "/user/reset?token="+token;
+
+            emailService.sendEmail(userEmail, resetPasswordUrl);
+
+            return new ResponseEntity<String>("Forgot Mail sent successfully",HttpStatus.OK);
+        }
+        else{
+            LOG.info("No user found by this email id {}",userEmail);
+            return new ResponseEntity<String>("No user found by this email id ",HttpStatus.OK);
+        }
+
+    }
 }

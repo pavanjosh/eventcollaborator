@@ -57,9 +57,11 @@ public class AuthenticationFilter extends GenericFilterBean {
         LOG.debug("In Authentication Filter");
 
         String resourcePath = new UrlPathHelper().getPathWithinApplication(httpRequest);
+
         try{
             if(requestForUnauthrisedPath(resourcePath)){
                 // log that this request needs no authentication
+                LOG.debug("This URL requires no Authentication");
             }
             else{
                 if (postToAuthenticate(httpRequest, resourcePath)) {
@@ -111,8 +113,9 @@ public class AuthenticationFilter extends GenericFilterBean {
 
     private boolean requestForUnauthrisedPath(String resourcePath){
          if(resourcePath.equals("/user/register")
-                || resourcePath.equals("/home")
-                || resourcePath.equals("/index")){
+                 || resourcePath.equals("/home")
+                 || resourcePath.equals("/index")
+                 ||resourcePath.equals("/user/forgot")){
              return true;
          }
         return false;
@@ -121,13 +124,15 @@ public class AuthenticationFilter extends GenericFilterBean {
     private void addSessionContextToLogging(){
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        String token = (String)authentication.getPrincipal().toString();
-        String userValue = (String)authentication.getDetails().toString();
+        if(authentication != null) {
+            String token = (String) authentication.getPrincipal().toString();
+            String userValue = (String) authentication.getDetails().toString();
 
-        MessageDigestPasswordEncoder encoder = new MessageDigestPasswordEncoder("SHA-1");
-        String tokenValue = encoder.encodePassword(token, "random_salt");
-        MDC.put(TOKEN_SESSION_KEY, tokenValue);
-        MDC.put(USER_SESSION_KEY, userValue);
+            MessageDigestPasswordEncoder encoder = new MessageDigestPasswordEncoder("SHA-1");
+            String tokenValue = encoder.encodePassword(token, "random_salt");
+            MDC.put(TOKEN_SESSION_KEY, tokenValue);
+            MDC.put(USER_SESSION_KEY, userValue);
+        }
 
     }
     private void processTokenAuthentication(String token){

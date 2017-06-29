@@ -29,6 +29,12 @@ public class UserEntity {
     private boolean active = true;
 
 
+    private Date createdOn;
+
+    private Date lastLoggedIn;
+
+    private String resetToken;
+
 
     @CreatedDate
     private Date createdDate;
@@ -82,5 +88,27 @@ public class UserEntity {
         this.dob = dob;
     }
 
+    public Date getCreatedOn() {
+        return createdOn;
+    }
 
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+    }
+
+    public Date getLastLoggedIn() {
+        return lastLoggedIn;
+    }
+
+    public void setLastLoggedIn(Date lastLoggedIn) {
+        this.lastLoggedIn = lastLoggedIn;
+    }
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
 }
